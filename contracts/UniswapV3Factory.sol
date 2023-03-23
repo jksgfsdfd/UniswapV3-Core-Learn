@@ -13,6 +13,7 @@ contract UniswapV3Factory is
     UniswapV3PoolDeployer
 {
     // more volatile the pair, higher the fee , higher the tickspacing
+    address public owner;
     mapping(uint24 => int24) public override feeAmountTickSpacing;
 
     mapping(address => mapping(address => mapping(uint24 => address)))
