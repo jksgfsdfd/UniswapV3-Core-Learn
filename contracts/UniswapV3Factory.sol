@@ -29,7 +29,7 @@ contract UniswapV3Factory is
         emit FeeAmountEnabled(10000, 200);
     }
 
-    // why is fee uint24?
+    // since we are representing hundredth of a basis point, 16bits would mean we can set fee to max <10%.
     function createPool(
         address tokenA,
         address tokenB,

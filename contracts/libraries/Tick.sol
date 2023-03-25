@@ -154,6 +154,9 @@ library Tick {
 
         info.liquidityGross = liquidityGrossAfter;
 
-        // add liquidity net
+        // for upper tick the left side will have liquidity delta change and hence when going from left to right this will result in -liquidityDelta change
+        info.liquidityNet = upper
+            ? info.liquidityNet - liquidityDelta
+            : info.liquidityNet + liquidityDelta;
     }
 }
