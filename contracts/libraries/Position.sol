@@ -2,12 +2,14 @@
 
 pragma solidity ^0.8.0;
 
+import "./LiquidityMath.sol";
+import "./FullMath.sol";
+import "./FixedPoint128.sol";
+
 library Position {
     struct Info {
-        // the info regarding the lower and upper ticks corresponding to a position are encoded in the poisition id itself
+        // the info regarding the owner,lower and upper ticks of a position are encoded in the poisition id itself
         uint128 liquidity;
-        // int24 tickLower;
-        // int24 tickUpper;
         uint256 feeGrowthInside0LastX128;
         uint256 feeGrowthInside1LastX128;
         uint128 tokensOwed0;
@@ -26,17 +28,12 @@ library Position {
         ];
     }
 
-    // create position
-    // collection fees to update position
-    // remove their position
-    // add more liquidity to their position
-
-    // to collect the accumulated fees to the position
+    // used to make a change to the liquidity of a poistion or to collect fees(delta = 0)
     function update(
         Info storage self,
-        uint128 liquidityDelta,
-        uint128 feeGrowthInside0X128,
-        uint128 feeGrowthInside1X128
+        int128 liquidityDelta,
+        uint256 feeGrowthInside0X128,
+        uint256 feeGrowthInside1X128
     ) internal {
         Info memory _self = self;
         uint128 liquidityNext;
@@ -44,13 +41,27 @@ library Position {
             require(_self.liquidity != 0, "no poke");
             liquidityNext = _self.liquidity; // uselesss line
         } else {
-            liquidityNext = _self.liquidity + liquidityDelta;
+            liquidityNext = LiquidityMath.addDelta(
+                _self.liquidity,
+                liquidityDelta
+            );
         }
 
-        uint128 tokensOwed0 = (feeGrowthInside0X128 -
-            _self.feeGrowthInside0LastX128) * _self.liquidity;
-        uint128 tokensOwed1 = (feeGrowthInside1X128 -
-            _self.feeGrowthInside1LastX128) * _self.liquidity;
+        // fullmath allows us to obtain the result of uint256*uint256/uint256
+        uint128 tokensOwed0 = uint128(
+            FullMath.mulDiv(
+                feeGrowthInside0X128 - _self.feeGrowthInside0LastX128,
+                _self.liquidity,
+                FixedPoint128.Q128
+            )
+        );
+        uint128 tokensOwed1 = uint128(
+            FullMath.mulDiv(
+                feeGrowthInside1X128 - _self.feeGrowthInside1LastX128,
+                _self.liquidity,
+                FixedPoint128.Q128
+            )
+        );
 
         if (liquidityDelta != 0) {
             self.liquidity = liquidityNext;
@@ -58,7 +69,7 @@ library Position {
 
         self.feeGrowthInside0LastX128 = feeGrowthInside0X128;
         self.feeGrowthInside1LastX128 = feeGrowthInside1X128;
-        if (tokensOwed0 > 0 || tokensOwed > 0) {
+        if (tokensOwed0 > 0 || tokensOwed1 > 0) {
             self.tokensOwed0 += tokensOwed0;
             self.tokensOwed1 += tokensOwed1;
         }

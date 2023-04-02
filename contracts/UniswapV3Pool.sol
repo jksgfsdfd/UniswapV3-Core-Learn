@@ -3,57 +3,102 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/IUniswapV3Pool.sol";
+
 import "./NoDelegateCall.sol";
+
+// to get the initial arguments
+import "./interfaces/IUniswapV3PoolDeployer.sol";
+// to get the owner
+import "./interfaces/IUniswapV3Factory.sol";
+// to get the token balances of the pool
+import "./interfaces/IERC20Minimal.sol";
+// to perform callbacks to obtain the tokens
+import "./interfaces/callback/IUniswapV3MintCallback.sol";
+import "./interfaces/callback/IUniswapV3SwapCallback.sol";
+import "./interfaces/callback/IUniswapV3FlashCallback.sol";
+
+// to perform the corresponding operations
 import "./libraries/Tick.sol";
 import "./libraries/TickMath.sol";
 import "./libraries/Position.sol";
 import "./libraries/Oracle.sol";
 import "./libraries/TickBitmap.sol";
+import "./libraries/SqrtPriceMath.sol";
+import "./libraries/SwapMath.sol";
+
+// useful to convert the mint and burn amounts to modify position amount
+import "./libraries/SafeCast.sol";
+
+import "./libraries/TransferHelper.sol";
 
 contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
+    using SafeCast for uint256;
+    using SafeCast for int256;
+
     address public immutable factory;
     address public immutable token0;
     address public immutable token1;
 
-    // does using unit24 instead of 256 for immutable variables save gas?
+    // fee in hundredths of basis point
     uint24 public immutable fee;
+
     int24 public immutable tickSpacing;
     uint128 public immutable maxLiquidityPerTick;
 
     struct Slot0 {
         // the current price sqrt
         uint160 sqrtPriceX96;
-        // the tick corresponding to the current price
+        // the tick corresponding to the current price. accurate upto a basis point
         int24 tick;
         // the index of the latest observation
         uint16 observationIndex;
-        // the total num of observations being stored now. useful to run around the buffer
+        // the total num of observations being stored now
         uint16 observationCardinality;
-        // don't know the use of this
+        // the number of slots that have been activated to store observations.
         uint16 observationCardinalityNext;
-        uint8 protocolFee;
-        // don't know the use of this
+        // first 4 bits store info of token1 fees and the next 4 store token0 fees
+        uint8 feeProtocol;
         bool unlocked;
     }
 
     Slot0 public slot0;
 
-    // total fee growth in the pool
+    // total fee growth per liquidity in the pool
     uint256 public feeGrowthGlobal0X128;
     uint256 public feeGrowthGlobal1X128;
 
-    mapping(int24 => Tick.info) public ticks;
-    mapping(int16 => uint256) public tickBitmap;
-    mapping(bytes32 => Position.info) public positions;
-    Oracle.observations[65535] public observations;
+    using Tick for mapping(int24 => Tick.Info);
+    mapping(int24 => Tick.Info) public ticks;
 
-    modifier Lock() {
+    // to find the next initialized tick faster when swapping
+    using TickBitmap for mapping(int16 => uint256);
+    mapping(int16 => uint256) public tickBitmap;
+
+    using Position for mapping(bytes32 => Position.Info);
+    using Position for Position.Info;
+    mapping(bytes32 => Position.Info) public positions;
+
+    // oracle storing the timestamp wise tickCumulative and secondsPerliquidity
+    using Oracle for Oracle.Observation[65535];
+    Oracle.Observation[65535] public observations;
+
+    struct ProtocolFees {
+        uint128 token0;
+        uint128 token1;
+    }
+
+    ProtocolFees public protocolFees;
+
+    uint128 public liquidity;
+
+    modifier lock() {
         require(slot0.unlocked, "Locked");
         slot0.unlocked = false;
         _;
         slot0.unlocked = true;
     }
 
+    // setting and collecting protocol fee
     modifier onlyFactoryOwner() {
         require(msg.sender == IUniswapV3Factory(factory).owner());
         _;
@@ -68,6 +113,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         ).parameters();
         tickSpacing = _tickSpacing;
 
+        // the max liquidity of the entire pool is type(128).max
         maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(
             _tickSpacing
         );
@@ -80,7 +126,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
     }
 
     function _blockTimestamp() internal view virtual returns (uint32) {
-        return uint32(block.timestamp); // truncation is desired
+        return uint32(block.timestamp);
     }
 
     // using staticcall and call instead of IERC20(token0).function() will save gas.
@@ -91,6 +137,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                 address(this)
             )
         );
+        // why data.length>32? does increase gas cost but must be to also support returns where there is more data returned. in case of data length being greater than 32bytes, abi.decode(data,(uint256)) decodes the first 32bytes
         require(success && data.length >= 32);
         return abi.decode(data, (uint256));
     }
@@ -106,6 +153,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         return abi.decode(data, (uint256));
     }
 
+    //
     function snapshotCumulativesInside(
         int24 tickLower,
         int24 tickUpper
@@ -231,6 +279,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             observationCardinalityNextOld,
             observationCardinalityNext
         );
+        // won't updating slot inside the if condition save gas
         slot0.observationCardinalityNext = observationCardinalityNextNew;
         if (observationCardinalityNextOld != observationCardinalityNextNew)
             emit IncreaseObservationCardinalityNext(
@@ -240,7 +289,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
     }
 
     function initialize(uint160 sqrtPriceX96) external override {
-        require(slot0.sqrtPriceX96 == 0, "AI");
+        require(slot0.sqrtPriceX96 == 0, "Already Initialized");
 
         int24 tick = TickMath.getTickAtSqrtRatio(sqrtPriceX96);
 
@@ -267,11 +316,11 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         // the lower and upper tick of the position
         int24 tickLower;
         int24 tickUpper;
-        // any change in liquidity
+        // wanted delta of the positions liquidity
         int128 liquidityDelta;
     }
 
-    // this functions updates the position,tickLower,tickUpper and the tickbitmap
+    // this function updates the position,tickLower,tickUpper and the tickbitmap
     function _updatePosition(
         address owner,
         int24 tickLower,
@@ -313,6 +362,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                 false,
                 maxLiquidityPerTick
             );
+
             flippedUpper = ticks.update(
                 tickUpper,
                 tick,
@@ -380,10 +430,10 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             _slot0.tick
         );
 
+        // finding the required token amounts to perform the liquidity modification
         if (params.liquidityDelta != 0) {
             if (_slot0.tick < params.tickLower) {
-                // current tick is below the passed range; liquidity can only become in range by crossing from left to
-                // right, when we'll need _more_ token0 (it's becoming more valuable) so user must provide it
+                // the current price is lower than the lower price of the range. hence the position would be entirely of token0.
                 amount0 = SqrtPriceMath.getAmount0Delta(
                     TickMath.getSqrtRatioAtTick(params.tickLower),
                     TickMath.getSqrtRatioAtTick(params.tickUpper),
@@ -434,6 +484,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
     }
 
     // here we ensure that lp has provided enough tokens
+    // modifyPosition is used for both increasing and decreasing the liquidity of a position. hence it takes in an int128 type param. so the max possible positive val is 2**127. The input to mint should always be positive and map to this value. hence uint128 is the best choice. this will be converted to int128 using safe cast to ensure that no overflow occurs.
     function mint(
         address recipient,
         int24 tickLower,
@@ -447,7 +498,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                 owner: recipient,
                 tickLower: tickLower,
                 tickUpper: tickUpper,
-                liquidityDelta: int256(amount).toInt128()
+                liquidityDelta: int256(uint256(amount)).toInt128()
             })
         );
 
@@ -463,10 +514,8 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             amount1,
             data
         );
-        if (amount0 > 0)
-            require(balance0Before.add(amount0) <= balance0(), "M0");
-        if (amount1 > 0)
-            require(balance1Before.add(amount1) <= balance1(), "M1");
+        if (amount0 > 0) require(balance0Before + amount0 <= balance0(), "M0");
+        if (amount1 > 0) require(balance1Before + amount1 <= balance1(), "M1");
 
         emit Mint(
             msg.sender,
@@ -535,7 +584,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                     owner: msg.sender,
                     tickLower: tickLower,
                     tickUpper: tickUpper,
-                    liquidityDelta: -int256(amount).toInt128()
+                    liquidityDelta: -int256(uint256(amount)).toInt128()
                 })
             );
 
@@ -672,6 +721,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                 );
 
             // ensure that we do not overshoot the min/max tick, as the tick bitmap is not aware of these bounds
+            // how is liquidity possible in this case?
             if (step.tickNext < TickMath.MIN_TICK) {
                 step.tickNext = TickMath.MIN_TICK;
             } else if (step.tickNext > TickMath.MAX_TICK) {
@@ -704,14 +754,14 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             if (exactInput) {
                 state.amountSpecifiedRemaining -= (step.amountIn +
                     step.feeAmount).toInt256();
-                state.amountCalculated = state.amountCalculated.sub(
-                    step.amountOut.toInt256()
-                );
+                state.amountCalculated =
+                    state.amountCalculated -
+                    step.amountOut.toInt256();
             } else {
                 state.amountSpecifiedRemaining += step.amountOut.toInt256();
-                state.amountCalculated = state.amountCalculated.add(
-                    (step.amountIn + step.feeAmount).toInt256()
-                );
+                state.amountCalculated =
+                    state.amountCalculated +
+                    (step.amountIn + step.feeAmount).toInt256();
             }
 
             // if the protocol fee is on, calculate how much is owed, decrement feeAmount, and increment protocolFee
@@ -729,7 +779,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                     state.liquidity
                 );
 
-            // shift tick if we reached the next price
+            // state.sqrtPrice has the price reached from the swap and step.sqrtPrice has the price of the next initialized tick within the word
             if (state.sqrtPriceX96 == step.sqrtPriceNextX96) {
                 // if the tick is initialized, run the tick transition
                 if (step.initialized) {
@@ -775,6 +825,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                     );
                 }
 
+                // if zeroForOne the next tick would be lte state.tick . Hence to avoid the same tick, we will use step.tickNext-1
                 state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext;
             } else if (state.sqrtPriceX96 != step.sqrtPriceStartX96) {
                 // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
@@ -811,7 +862,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             slot0.sqrtPriceX96 = state.sqrtPriceX96;
         }
 
-        // update liquidity if it changed
+        // update liquidity if it changed : even if ticks have changed liquidity could be unchanged
         if (cache.liquidityStart != state.liquidity)
             liquidity = state.liquidity;
 
@@ -850,7 +901,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                 amount1,
                 data
             );
-            require(balance0Before.add(uint256(amount0)) <= balance0(), "IIA");
+            require(balance0Before + uint256(amount0) <= balance0(), "IIA");
         } else {
             if (amount0 < 0)
                 TransferHelper.safeTransfer(
@@ -865,7 +916,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                 amount1,
                 data
             );
-            require(balance1Before.add(uint256(amount1)) <= balance1(), "IIA");
+            require(balance1Before + (uint256(amount1)) <= balance1(), "IIA");
         }
 
         emit Swap(
@@ -880,7 +931,8 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         slot0.unlocked = true;
     }
 
-    // the flash swap just checks that the necessary fees have been paid and the tokens refunded
+    // flash just checks that the necessary fees have been paid and the tokens refunded
+    // the fees goes to the current in range liquidity
     function flash(
         address recipient,
         uint256 amount0,
@@ -909,8 +961,8 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         uint256 balance0After = balance0();
         uint256 balance1After = balance1();
 
-        require(balance0Before.add(fee0) <= balance0After, "F0");
-        require(balance1Before.add(fee1) <= balance1After, "F1");
+        require(balance0Before + fee0 <= balance0After, "F0");
+        require(balance1Before + fee1 <= balance1After, "F1");
 
         // sub is safe because we know balanceAfter is gt balanceBefore by at least fee
         uint256 paid0 = balance0After - balance0Before;

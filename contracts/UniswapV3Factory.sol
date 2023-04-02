@@ -3,24 +3,34 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/IUniswapV3Factory.sol";
+
+// prevents delegatecall forks
 import "./NoDelegateCall.sol";
-import "./UniswapV3Pool.sol";
+// deployment of pools is done in a specific way to make on-chain interactions with pools from other contracts more efficent
 import "./UniswapV3PoolDeployer.sol";
+
+import "./UniswapV3Pool.sol";
 
 contract UniswapV3Factory is
     IUniswapV3Factory,
     NoDelegateCall,
     UniswapV3PoolDeployer
 {
-    // more volatile the pair, higher the fee , higher the tickspacing
+    // controls protocol fee and fee amounts
     address public owner;
+
+    // more volatile the pair, higher the fee , higher the tickspacing
+    // since we are representing hundredth of a basis point, 16bits would mean we can set fee to max <10%. hence 24bits
     mapping(uint24 => int24) public override feeAmountTickSpacing;
 
+    // tokenA -> tokenB -> pool
     mapping(address => mapping(address => mapping(uint24 => address)))
         public
         override getPool;
 
     constructor() {
+        owner = msg.sender;
+        emit OwnerChanged(address(0), msg.sender);
         feeAmountTickSpacing[500] = 10;
         emit FeeAmountEnabled(500, 10);
         feeAmountTickSpacing[3000] = 60;
@@ -29,7 +39,6 @@ contract UniswapV3Factory is
         emit FeeAmountEnabled(10000, 200);
     }
 
-    // since we are representing hundredth of a basis point, 16bits would mean we can set fee to max <10%.
     function createPool(
         address tokenA,
         address tokenB,
@@ -46,10 +55,10 @@ contract UniswapV3Factory is
             getPool[token0][token1][fee] == address(0),
             "Pool Already Present"
         );
-        // the deployment is done without passing any constructor arguments. the pool contract will get the needed values by making a call to the deployer or could have been this contract. it is mentioned this method is more efficient that passing in the constructor arguments since that will make the create2 address calculation little more complex. will have to check the gas usage in both case.
+        // the deployment is done without passing any constructor arguments. the pool contract will get the needed values by making a call to this contract. this leads to the same init code for all the contracts hence making it possible for onchain contracts like routers to compute the address of a pair without storing the entire init code. but is this better than calling the factory contract to obtain the pair?
         pool = deploy(address(this), token0, token1, fee, tickSpacing);
         getPool[token0][token1][fee] = pool;
-        // won't creating a function for getting the pool that sorts the tokens be better? it is mentioned that this is a deliberate choice to avoid the cost of comparing addresses
+        // although this leads to more gas for creation of a pool, it makes pool retrieval more efficient
         getPool[token1][token0][fee] = pool;
         emit PoolCreated(token0, token1, fee, tickSpacing, pool);
     }
@@ -64,7 +73,8 @@ contract UniswapV3Factory is
     function enableFeeAmount(uint24 fee, int24 tickSpacing) external override {
         require(msg.sender == owner, "Not authorized");
         require(fee < 1000000, "Should be less than 100%");
-        // to write
+        // tickspacing is limited to 16384 in order to prevent an overflow in the nextInitializedTickWithinOneWord function of TickBitmap. but i don't know how this works.
+        require(tickSpacing > 0 && tickSpacing < 16384);
         require(feeAmountTickSpacing[fee] == 0, "Fee already enabled");
         feeAmountTickSpacing[fee] = tickSpacing;
         emit FeeAmountEnabled(fee, tickSpacing);

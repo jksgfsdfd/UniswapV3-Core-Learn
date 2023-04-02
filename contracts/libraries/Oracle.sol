@@ -6,7 +6,7 @@ library Oracle {
     struct Observation {
         // the block timestamp of the observation
         uint32 blockTimestamp;
-        // the tick accumulator, i.e. tick * time elapsed since the pool was first initialized
+        // the tick accumulator, i.e. tick * time elapsed, since the pool was first initialized
         int56 tickCumulative;
         // the seconds per liquidity, i.e. seconds elapsed / max(1, liquidity) since the pool was first initialized
         uint160 secondsPerLiquidityCumulativeX128;
@@ -24,7 +24,9 @@ library Oracle {
         return
             Observation({
                 blockTimestamp: blockTimestamp,
-                tickCumulative: last.tickCumulative + int56(tick) * delta,
+                tickCumulative: last.tickCumulative +
+                    int56(tick) *
+                    int56(uint56(delta)),
                 secondsPerLiquidityCumulativeX128: last
                     .secondsPerLiquidityCumulativeX128 +
                     ((uint160(delta) << 128) / (liquidity > 0 ? liquidity : 1)),
@@ -43,6 +45,17 @@ library Oracle {
             initialized: true
         });
         return (1, 1);
+    }
+
+    // considers the timestamps below the current timestamp as being generated in this cycle
+    function lte(uint32 time, uint32 a, uint32 b) private pure returns (bool) {
+        // if there hasn't been overflow, no need to adjust
+        if (a <= time && b <= time) return a <= b;
+
+        uint256 aAdjusted = a > time ? a : a + 2 ** 32;
+        uint256 bAdjusted = b > time ? b : b + 2 ** 32;
+
+        return aAdjusted <= bAdjusted;
     }
 
     function write(
@@ -224,8 +237,8 @@ library Oracle {
             return (
                 beforeOrAt.tickCumulative +
                     ((atOrAfter.tickCumulative - beforeOrAt.tickCumulative) /
-                        observationTimeDelta) *
-                    targetDelta,
+                        int56(uint56(observationTimeDelta))) *
+                    int56(uint56(targetDelta)),
                 beforeOrAt.secondsPerLiquidityCumulativeX128 +
                     uint160(
                         (uint256(

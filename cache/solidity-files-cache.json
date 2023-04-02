@@ -1,0 +1,1212 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/NoDelegateCall.sol": {
+      "lastModificationDate": 1679191630269,
+      "contentHash": "ee9e6de8019b6063bdff7b444865bbb4",
+      "sourceName": "contracts/NoDelegateCall.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "NoDelegateCall"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/UniswapV3Pool.sol": {
+      "lastModificationDate": 1680444649224,
+      "contentHash": "39c7f7ad8525df2b0f56a8d599a27741",
+      "sourceName": "contracts/UniswapV3Pool.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IUniswapV3Pool.sol",
+        "./NoDelegateCall.sol",
+        "./interfaces/IUniswapV3PoolDeployer.sol",
+        "./interfaces/IUniswapV3Factory.sol",
+        "./interfaces/IERC20Minimal.sol",
+        "./interfaces/callback/IUniswapV3MintCallback.sol",
+        "./interfaces/callback/IUniswapV3SwapCallback.sol",
+        "./interfaces/callback/IUniswapV3FlashCallback.sol",
+        "./libraries/Tick.sol",
+        "./libraries/TickMath.sol",
+        "./libraries/Position.sol",
+        "./libraries/Oracle.sol",
+        "./libraries/TickBitmap.sol",
+        "./libraries/SqrtPriceMath.sol",
+        "./libraries/SwapMath.sol",
+        "./libraries/SafeCast.sol",
+        "./libraries/TransferHelper.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "UniswapV3Pool"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/IUniswapV3Pool.sol": {
+      "lastModificationDate": 1679597086106,
+      "contentHash": "ae16dd28ce7a66089eed54a57f135208",
+      "sourceName": "contracts/interfaces/IUniswapV3Pool.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./pool/IUniswapV3PoolImmutables.sol",
+        "./pool/IUniswapV3PoolState.sol",
+        "./pool/IUniswapV3PoolDerivedState.sol",
+        "./pool/IUniswapV3PoolActions.sol",
+        "./pool/IUniswapV3PoolOwnerActions.sol",
+        "./pool/IUniswapV3PoolEvents.sol"
+      ],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3Pool"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/IUniswapV3PoolDeployer.sol": {
+      "lastModificationDate": 1679767872294,
+      "contentHash": "582fe170f55329e8ed300238a52e1821",
+      "sourceName": "contracts/interfaces/IUniswapV3PoolDeployer.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolDeployer"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/IUniswapV3Factory.sol": {
+      "lastModificationDate": 1679193824702,
+      "contentHash": "f0eeb76e5ae42bcbacc8efc10e091716",
+      "sourceName": "contracts/interfaces/IUniswapV3Factory.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3Factory"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/IERC20Minimal.sol": {
+      "lastModificationDate": 1679801173612,
+      "contentHash": "3984acb01f7901b432d4bb63e7c26c4f",
+      "sourceName": "contracts/interfaces/IERC20Minimal.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IERC20Minimal"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/callback/IUniswapV3MintCallback.sol": {
+      "lastModificationDate": 1680189343066,
+      "contentHash": "1b49846c9d15506134419bb3afa18bb7",
+      "sourceName": "contracts/interfaces/callback/IUniswapV3MintCallback.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3MintCallback"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol": {
+      "lastModificationDate": 1680189422499,
+      "contentHash": "a8ba2d37b0107911ae0e3b0e123cbd83",
+      "sourceName": "contracts/interfaces/callback/IUniswapV3SwapCallback.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3SwapCallback"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/callback/IUniswapV3FlashCallback.sol": {
+      "lastModificationDate": 1680189468507,
+      "contentHash": "63dadbfc744a57bd4bd252579158335d",
+      "sourceName": "contracts/interfaces/callback/IUniswapV3FlashCallback.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3FlashCallback"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/Tick.sol": {
+      "lastModificationDate": 1680442410131,
+      "contentHash": "ece81a45e6ac25d4b4e37a744e6fbc0c",
+      "sourceName": "contracts/libraries/Tick.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./TickMath.sol",
+        "./LiquidityMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Tick"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/TickMath.sol": {
+      "lastModificationDate": 1680442053404,
+      "contentHash": "fb405a2878417faf10d50f922addcae2",
+      "sourceName": "contracts/libraries/TickMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "TickMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/Position.sol": {
+      "lastModificationDate": 1680443629410,
+      "contentHash": "242d67bdcc7d9e6533f7d51a5c0b6341",
+      "sourceName": "contracts/libraries/Position.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./LiquidityMath.sol",
+        "./FullMath.sol",
+        "./FixedPoint128.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Position"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/Oracle.sol": {
+      "lastModificationDate": 1680443223334,
+      "contentHash": "62fdd62006adb169effc68a6ad43dc68",
+      "sourceName": "contracts/libraries/Oracle.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Oracle"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/TickBitmap.sol": {
+      "lastModificationDate": 1680432547640,
+      "contentHash": "2ef8a6e302d05d6110dbea147a33ca36",
+      "sourceName": "contracts/libraries/TickBitmap.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BitMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "TickBitmap"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/SqrtPriceMath.sol": {
+      "lastModificationDate": 1680432634366,
+      "contentHash": "12b3418072877bfb8a251d21faa3c0f7",
+      "sourceName": "contracts/libraries/SqrtPriceMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./LowGasSafeMath.sol",
+        "./SafeCast.sol",
+        "./FullMath.sol",
+        "./UnsafeMath.sol",
+        "./FixedPoint96.sol"
+      ],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "SqrtPriceMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/SwapMath.sol": {
+      "lastModificationDate": 1680442022823,
+      "contentHash": "92d39d7fe28300be36807e1201230554",
+      "sourceName": "contracts/libraries/SwapMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./FullMath.sol",
+        "./SqrtPriceMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "SwapMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/SafeCast.sol": {
+      "lastModificationDate": 1679814350094,
+      "contentHash": "9dae19100fdb9998f92b9e9651d955ab",
+      "sourceName": "contracts/libraries/SafeCast.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "SafeCast"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/TransferHelper.sol": {
+      "lastModificationDate": 1680443454645,
+      "contentHash": "d8668b643d73377e915cb8e44c86e0f6",
+      "sourceName": "contracts/libraries/TransferHelper.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IERC20Minimal.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0"
+      ],
+      "artifacts": [
+        "TransferHelper"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/pool/IUniswapV3PoolImmutables.sol": {
+      "lastModificationDate": 1680441786511,
+      "contentHash": "e236e09a9d654fb2f20a6da5dba2bd2f",
+      "sourceName": "contracts/interfaces/pool/IUniswapV3PoolImmutables.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolImmutables"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/pool/IUniswapV3PoolState.sol": {
+      "lastModificationDate": 1679597086106,
+      "contentHash": "8d2f689a71353510e134e21595d9b950",
+      "sourceName": "contracts/interfaces/pool/IUniswapV3PoolState.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolState"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol": {
+      "lastModificationDate": 1679597086106,
+      "contentHash": "dbc9532a0b72a39523853e08b48f2b1a",
+      "sourceName": "contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolDerivedState"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/pool/IUniswapV3PoolActions.sol": {
+      "lastModificationDate": 1679597086106,
+      "contentHash": "dd2e977788cdc261f944db248704bd25",
+      "sourceName": "contracts/interfaces/pool/IUniswapV3PoolActions.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolActions"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/pool/IUniswapV3PoolOwnerActions.sol": {
+      "lastModificationDate": 1679977168954,
+      "contentHash": "1b06ecc79e75f836c446ccf286e671e4",
+      "sourceName": "contracts/interfaces/pool/IUniswapV3PoolOwnerActions.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolOwnerActions"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/interfaces/pool/IUniswapV3PoolEvents.sol": {
+      "lastModificationDate": 1680441806627,
+      "contentHash": "902eae5e06639b6e86e02457473ff165",
+      "sourceName": "contracts/interfaces/pool/IUniswapV3PoolEvents.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolEvents"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/LiquidityMath.sol": {
+      "lastModificationDate": 1680442415643,
+      "contentHash": "6d4d83a5cf83dd7edd1b2f5a62026119",
+      "sourceName": "contracts/libraries/LiquidityMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "LiquidityMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/FullMath.sol": {
+      "lastModificationDate": 1680442009231,
+      "contentHash": "604af1431f8a64e05968a314822fa488",
+      "sourceName": "contracts/libraries/FullMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.0"
+      ],
+      "artifacts": [
+        "FullMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/FixedPoint128.sol": {
+      "lastModificationDate": 1680279195013,
+      "contentHash": "1298041826d8bf2a444d660fc3b6aebd",
+      "sourceName": "contracts/libraries/FixedPoint128.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.0"
+      ],
+      "artifacts": [
+        "FixedPoint128"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/BitMath.sol": {
+      "lastModificationDate": 1680431617921,
+      "contentHash": "81e58372a134f05eb1a211a1efef8a1e",
+      "sourceName": "contracts/libraries/BitMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "BitMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/LowGasSafeMath.sol": {
+      "lastModificationDate": 1680432600586,
+      "contentHash": "ff4d506a22d90b314ab325b437ff7729",
+      "sourceName": "contracts/libraries/LowGasSafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.0"
+      ],
+      "artifacts": [
+        "LowGasSafeMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/UnsafeMath.sol": {
+      "lastModificationDate": 1680425456777,
+      "contentHash": "0c13fc78d81e21cc6ddcc83da3e4740a",
+      "sourceName": "contracts/libraries/UnsafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "UnsafeMath"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/libraries/FixedPoint96.sol": {
+      "lastModificationDate": 1680432631746,
+      "contentHash": "f3ab03d6bbfd7c6834ecd3fc311cb0e7",
+      "sourceName": "contracts/libraries/FixedPoint96.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.0"
+      ],
+      "artifacts": [
+        "FixedPoint96"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/UniswapV3PoolDeployer.sol": {
+      "lastModificationDate": 1680442139242,
+      "contentHash": "bfd1e7e7a9c9d357ad22822262443bd0",
+      "sourceName": "contracts/UniswapV3PoolDeployer.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./UniswapV3Pool.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "UniswapV3PoolDeployer"
+      ]
+    },
+    "/home/ronmaa/CS/Web3/Uniswap/UniswapV3/UniswapV3-Core/contracts/UniswapV3Factory.sol": {
+      "lastModificationDate": 1679977177774,
+      "contentHash": "118ad7f9be218dfd7b940a3a59af256f",
+      "sourceName": "contracts/UniswapV3Factory.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IUniswapV3Factory.sol",
+        "./NoDelegateCall.sol",
+        "./UniswapV3PoolDeployer.sol",
+        "./UniswapV3Pool.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "UniswapV3Factory"
+      ]
+    }
+  }
+}

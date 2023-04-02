@@ -3,13 +3,15 @@
 pragma solidity ^0.8.0;
 
 import "./TickMath.sol";
+import "./LiquidityMath.sol";
 
 library Tick {
     struct Info {
         uint128 liquidityGross;
-        // amount of liquidity to be added or subtracted when crossing this tick
+        // amount of liquidity to be added or subtracted when crossing this tick from left to right.
         int128 liquidityNet;
-        //
+        // outside refers to the side in which the current tick is absent.
+        // fee growth is measured per liquidity. hence we use 128 bit precision
         uint256 feeGrowthOutside0X128;
         uint256 feeGrowthOutside1X128;
         int56 tickCumulativeOutside;
@@ -22,7 +24,6 @@ library Tick {
         int24 tickSpacing
     ) internal pure returns (uint128) {
         // finding the min and max ticks divisible by tickspacing
-        // why is the total liquidity capped to uint128.max?
         int24 minTick = (TickMath.MIN_TICK / tickSpacing) * tickSpacing;
         int24 maxTick = (TickMath.MAX_TICK / tickSpacing) * tickSpacing;
         uint24 numTicks = uint24((maxTick - minTick) / tickSpacing) + 1;
@@ -31,7 +32,7 @@ library Tick {
 
     // whenever the current tick passes a tick, it updates its feeOutside. this can be thought of as a gatekeeper checking the amounts whenever a person passes the gate.
     function getFeeGrowthInside(
-        mapping(int24 => Tick.info) storage self,
+        mapping(int24 => Tick.Info) storage self,
         int24 tickLower,
         int24 tickUpper,
         int24 tickCurrent,
@@ -42,8 +43,8 @@ library Tick {
         view
         returns (uint256 feeGrowthInside0X128, uint256 feeGrowthInside1X128)
     {
-        Info storage lower = tickLower[self];
-        Info storage upper = tickUpper[self];
+        Info storage lower = self[tickLower];
+        Info storage upper = self[tickUpper];
 
         uint256 feeGrowthBelow0X128;
         uint256 feeGrowthBelow1X128;
@@ -84,14 +85,14 @@ library Tick {
     }
 
     function clear(
-        mapping(int24 => Tick.info) storage self,
+        mapping(int24 => Tick.Info) storage self,
         int24 tick
     ) internal {
         delete self[tick];
     }
 
     function cross(
-        mapping(int24 => Tick.info) storage self,
+        mapping(int24 => Tick.Info) storage self,
         int24 tick,
         uint256 feeGrowthGlobal0X128,
         uint256 feeGrowthGlobal1X128,
@@ -99,26 +100,26 @@ library Tick {
         int56 tickCumulative,
         uint32 time
     ) internal returns (int128 liquidityNet) {
-        Tick.info storage info = self[tick];
+        Tick.Info storage info = self[tick];
         // update the (feeGrowth + secondsPerLiquidity + tickCumulative + seconds ) outside
         info.feeGrowthOutside0X128 =
-            feeGrowthOutside0X128 -
+            feeGrowthGlobal0X128 -
             info.feeGrowthOutside0X128;
         info.feeGrowthOutside1X128 =
-            feeGrowthOutside1X128 -
+            feeGrowthGlobal1X128 -
             info.feeGrowthOutside1X128;
         info.secondsPerLiquidityOutsideX128 =
             secondsPerLiquidityCumulativeX128 -
             info.secondsPerLiquidityOutsideX128;
         info.tickCumulativeOutside =
-            tickCumulativeInside -
+            tickCumulative -
             info.tickCumulativeOutside;
         info.secondsOutside = time - info.secondsOutside;
         liquidityNet = info.liquidityNet;
     }
 
     function update(
-        mapping(int24 => Tick.info) storage self,
+        mapping(int24 => Tick.Info) storage self,
         int24 tick,
         int24 tickCurrent,
         int128 liquidityDelta,
@@ -130,10 +131,13 @@ library Tick {
         bool upper,
         uint128 maxLiquidity
     ) internal returns (bool flipped) {
-        Tick.info storage info = self[tick];
+        Tick.Info storage info = self[tick];
 
         uint128 liquidityGrossBefore = info.liquidityGross;
-        uint128 liquidityGrossAfter = liquidityGrossBefore + liquidityDelta;
+        uint128 liquidityGrossAfter = LiquidityMath.addDelta(
+            liquidityGrossBefore,
+            liquidityDelta
+        );
 
         require(liquidityGrossAfter <= maxLiquidity, "liquidity overflow");
 
@@ -154,7 +158,7 @@ library Tick {
 
         info.liquidityGross = liquidityGrossAfter;
 
-        // for upper tick the left side will have liquidity delta change and hence when going from left to right this will result in -liquidityDelta change
+        // for upper tick when going from left to right, we will be removing this liquidity. hence -ve liquiditydela
         info.liquidityNet = upper
             ? info.liquidityNet - liquidityDelta
             : info.liquidityNet + liquidityDelta;
